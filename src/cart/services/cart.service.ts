@@ -43,7 +43,7 @@ export class CartService {
   async createByUserId(userId: string): Promise<Cart> {
     const id = v4(v4());
     await pool.query(
-      `insert into carts (id, user_id, created_at, status) values ($1, $2, current_date, 'ORDERED');`,
+      `insert into carts (id, user_id, created_at, updated_at, status) values ($1, $2, current_date, current_date, 'OPEN');`,
       [id, userId],
     );
     return { id, items: [] };

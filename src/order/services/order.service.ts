@@ -12,6 +12,33 @@ export class OrderService {
     return this.orders[orderId];
   }
 
+  async findByUserId(userId): Promise<any> {
+    const res = await pool.query(
+      `select orders.id, orders.user_id, orders.cart_id, orders.status, orders.delivery,orders.payment, orders.comments, orders.total from orders
+       where orders.user_id = $1;`,
+      [userId],
+    );
+    console.log(res.rows);
+    return await Promise.all(
+      res.rows.map(async ({ id, cart_id, delivery, status, comments }) => {
+        const itemsRaw = await pool.query(
+          `select carts.id, carts.user_id, cart_items.product_id, cart_items.count from carts, cart_items
+           where cart_items.cart_id  = carts.id and carts.id = $1`,
+          [cart_id],
+        );
+        const items = itemsRaw.rows.map(({ product_id, count }) => {
+          return { product_id, count };
+        });
+        return {
+          id,
+          address: delivery,
+          items,
+          statusHistory: [{ status, comment: comments }],
+        };
+      }),
+    );
+  }
+
   async create(data: any): Promise<Order> {
     const id = v4(v4());
     const order = {

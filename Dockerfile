@@ -7,7 +7,7 @@ RUN npm run build
 FROM alpine
 RUN apk add --update nodejs npm
 WORKDIR /app
-COPY package*.json .
+COPY package*.json ./
 RUN npm install ci --omit=dev
 COPY --from=builder /app/dist ./dist
 CMD ["node", "dist/main.js"]
